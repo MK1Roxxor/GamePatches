@@ -1,6 +1,7 @@
 ; World Class Leaderboard patch to fix the "Game returns to title screen"
 ; problem. Reason is a wrong error code check for Close() on OS versions <36.
 ; Code patches Close() in dos.library to always return success.
+; See thread on EAB for more info: http://eab.abime.net/showthread.php?t=10352
 ;
 ; stingray, 02-Aug-2020
 
