@@ -6,9 +6,8 @@
 ; stingray, 02-Aug-2020
 
 
-	INCLUDE	SOURCES:INCLUDE/LVOs.i
-
 	INCDIR	SOURCES:INCLUDE/
+	INCLUDE	lvos.i
 	INCLUDE	exec/exec.i
 
 
@@ -20,7 +19,7 @@ START	bra.b	.go
 .go	move.l	$4.w,a6
 
 	; patch is only required and useful on OS versions <36
-	cmp.w	#36,$14(a6)
+	cmp.w	#36,LIB_VERSION(a6)
 	bge.b	.exit
 
 	; open dos.library
@@ -31,9 +30,26 @@ START	bra.b	.go
 	beq.b	.exit
 	move.l	d0,a5
 
+
+	; check if patch is already installed
+	lea	_LVOClose(a5),a0
+
+	; if patch is already installed, do nothing
+	cmp.w	#$4ef9,(a0)
+	bne.b	.install
+
+	move.l	a5,a1
+	jsr	_LVOCloseLibrary(a6)
+	bra.b	.exit
+
+
+
+.install
+
+
 	; allocate memory for patch code
 	moveq	#ClosePatchSize,d0
-	moveq	#0,d1
+	moveq	#MEMF_PUBLIC,d1
 	jsr	_LVOAllocMem(a6)
 
 	tst.l	d0
@@ -72,7 +88,9 @@ START	bra.b	.go
 	jsr	_LVOPermit(a6)
 
 	
-.exit	rts
+.exit	moveq	#0,d0			; no error code
+
+	rts
 
 
 NewClose
